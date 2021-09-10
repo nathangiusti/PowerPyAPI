@@ -5,7 +5,7 @@ import urllib.parse
 
 
 class RestConnector:
-    """The REST Wrapper for PySense
+    """The REST Wrapper for PowerPy
     Use the rest_call method to make calls to the API
     Attributes:
         host (str): The host string, the base of the url to call
@@ -20,7 +20,7 @@ class RestConnector:
             host (str): The host string, the base of the url to call
             debug (bool): Whether to print debug messages about rest requests
             verify (bool): Whether to use SSL Certificate Verification
-            token (JSON): The authorization header
+            token (JSON): The authorization token
         """
         self.host = host
         self.debug = debug
@@ -89,13 +89,27 @@ class RestConnector:
                 except ValueError as e:
                     return response.content
 
+    def simple_rest_call(self, action_type, url):
+        action_type = action_type.lower()
+        full_url = url
+        if self.debug:
+            print('{}: {}'.format(action_type, full_url))
+        response = requests.request(action_type, full_url, headers=self.token, verify=self.verify)
+        parse_response(response)
+        if len(response.content) == 0:
+            return None
+        else:
+            try:
+                return response.json()
+            except ValueError as e:
+                return response.content
+
 
 def parse_response(response):
     """Parses response and throw exception if not successful."""
 
     if response.status_code not in [200, 201, 204]:
-        raise Exception('ERROR: {}: {}\nURL: {}'
-                                                .format(response.status_code, response.content, response.url))
+        raise Exception('ERROR: {}: {}\nURL: {}'.format(response.status_code, response.content, response.url))
 
 
 def build_query_string(dictionary):
