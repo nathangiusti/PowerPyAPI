@@ -1,7 +1,17 @@
 from openpyxl import Workbook
 
-from PowerPyAPI import Tenant
 
+"""
+Config
+app_names: Apps to retrieve
+include_dev: True to include dev apps
+include_test: False to include test apps
+output_file: Location to store resulting XLS
+"""
+
+output_file = 'User Access.xlsx'
+include_dev = True
+include_test = True
 app_names = ['BI360', 'Hero Analytics', 'High End & Craft Sales Reporting V1', 'Canada Solutions',
              'Canada Commercial Sales Production', 'Ontario Field Sales', 'Supply Chain Analytics',
              'Ontario Sales Intelligence', 'S&OP for Growth - US', 'Canada Commercial Sales', 'Beyond Beer Canada',
@@ -16,7 +26,7 @@ def main():
     wb = Workbook()
     ws = wb.active
     tenant = Tenant.authenticate_by_file('../config.yaml')
-    apps = tenant.get_apps_by_names(app_names, include_dev=True, include_test=True)
+    apps = tenant.get_apps_by_names(app_names, include_dev=include_dev, include_test=include_test)
     for app in apps:
         users = app.get_app_users()
         app_name = app.name
@@ -27,7 +37,7 @@ def main():
             ws.append([user.display_name, user.principal_type, user.app_user_access_right, user.email_address])
         ws = wb.create_sheet()
 
-    wb.save('User Access.xlsx')
+    wb.save(output_file)
 
 
 if __name__ == '__main__':

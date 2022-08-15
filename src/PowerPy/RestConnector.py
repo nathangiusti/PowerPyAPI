@@ -14,7 +14,7 @@ class RestConnector:
         token (JSON): The authorization header
     """
 
-    def __init__(self, host, token, debug, verify):
+    def __init__(self, host: str, token: str, debug: bool, verify: bool):
         """
         Args:
             host (str): The host string, the base of the url to call
@@ -29,9 +29,10 @@ class RestConnector:
             'Authorization': 'Bearer {}'.format(token)
         }
 
-    def rest_call(self, action_type, url, *,
-                  data=None, json_payload=None, query_params=None, path=None, file=None, raw=False):
-        """Run an arbitrary rest command against your Sisense instance
+    def rest_call(self, action_type: str, url: str, *,
+                  data: Any = None, json_payload: json = None, query_params: dict[str, Any] = None,
+                  path: str = None, file: str = None, raw: bool = False) -> json:
+        """Run an arbitrary rest command against PowerBI tenant
         Args:
             action_type (str): REST request type (get, post, patch, put, delete)
             url (str): api end point, example api/v1/app_database/encrypt_database_password or api/branding
@@ -89,7 +90,14 @@ class RestConnector:
                 except ValueError as e:
                     return response.content
 
-    def simple_rest_call(self, action_type, url):
+    def simple_rest_call(self, action_type: str, url: str) -> json:
+        """Simplified rest call when advanced options are unnecessary.
+        Args:
+            action_type (str): REST request type (get, post, patch, put, delete)
+            url (str): api end point, example api/v1/app_database/encrypt_database_password or api/branding
+        Returns:
+            JSON: Returns the json content blob by default. If path is set, returns nothing
+        """
         action_type = action_type.lower()
         full_url = url
         if self.debug:
@@ -105,14 +113,13 @@ class RestConnector:
                 return response.content
 
 
-def parse_response(response):
+def parse_response(response: requests.Response) -> None:
     """Parses response and throw exception if not successful."""
-
     if response.status_code not in [200, 201, 204]:
         raise Exception('ERROR: {}: {}\nURL: {}'.format(response.status_code, response.content, response.url))
 
 
-def build_query_string(dictionary):
+def build_query_string(dictionary: dict[str, Any]) -> str:
     """Builds a query string based on the dictionary passed in"""
 
     ret_arr = []
